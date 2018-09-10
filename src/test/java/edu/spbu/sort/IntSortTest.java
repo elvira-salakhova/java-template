@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 public class IntSortTest
 {
   public static final int SEED = 1;
-  public static final int ARRAY_SIZE = 10000000;
+  public static final int ARRAY_SIZE = 10000;
 
   /**
    *
