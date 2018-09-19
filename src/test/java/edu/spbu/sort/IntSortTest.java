@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 public class IntSortTest
 {
   public static final int SEED = 1;
-  public static final int ARRAY_SIZE = 10000;
+  public static final int ARRAY_SIZE = 10000000;
 
   /**
    *
@@ -34,8 +34,9 @@ public class IntSortTest
   @Test
   public void testSortArray() throws Exception {
     int array[] = generateRandomIntArray(ARRAY_SIZE, SEED);
-
-    IntSort.sort(array);
+    int left = 0;
+    int right = array.length-1;
+    IntSort.sort(array, left, right);
 
     // проверяем правильность сортировки
     int previousValue = Integer.MIN_VALUE;
