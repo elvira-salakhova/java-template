@@ -11,36 +11,25 @@ public class DenseMatrix implements Matrix
     public int columns = 0;
     public double[][] dMatrix;  /* массив матрицы */
 
+    @Override
+    public int numberOfColumns() {
+        return columns;
+    }
 
-
-  @Override
-  public int numberOfColumns() {
-      return columns;
-  }
-
-  @Override
-  public int numberOfRows() {
-      return rows;
-  }
-
-  /*Изменяет размер матрицы, чтобы можно было выполнять умножение*/
-  @Override
-  public void resizeMatrix(int x, int y)
-  {
-    rows = x;
-    columns = y;
-    this.dMatrix = new double[rows][columns];
-  }
-
-  @Override
-  public double getCell(int row, int column) {
-      return dMatrix[row][column];
-  }
+    @Override
+    public int numberOfRows() {
+        return rows;
+    }
+    @Override
+    public double getCell(int row, int column) {
+        return dMatrix[row][column];
+    }
 
     /**
      * загружает матрицу из файла
      * @param fileName
      */
+
     public DenseMatrix(String fileName) throws IOException{
         if(fileName.trim().length()==0) // если файл не существует
             return;
@@ -68,7 +57,11 @@ public class DenseMatrix implements Matrix
         }
         input.close();
     }
-
+    public DenseMatrix(int x, int y){
+        rows = x;
+        columns = y;
+        dMatrix = new double[rows][columns];
+    }
 
     /**
    * однопоточное умножение матриц
@@ -77,30 +70,20 @@ public class DenseMatrix implements Matrix
    * @param o
    * @return
    */
-  @Override public Matrix mul(Matrix o) throws IOException {
+    @Override public Matrix mul(Matrix o) throws IOException {
+        int r1 = rows;
+        int c1 = columns;
+        int r2 = o.numberOfRows();
+        int c2 = o.numberOfColumns();
 
-      int r1 = rows;
-      int c1 = columns;
-      int r2 = o.numberOfRows();
-      int c2 = o.numberOfColumns();
+        DenseMatrix result = new DenseMatrix(rows,o.numberOfColumns());
 
-      DenseMatrix result = new DenseMatrix("");
-      result.resizeMatrix(rows,o.numberOfColumns());
-
-
-      for (int i = 0; i < r1; i++)
-      {
-          for (int j = 0; j < c2; j++)
-          {
-              for (int k = 0; k < c1; k++)
-              {
-                  result.dMatrix[i][j] += dMatrix[i][k] * o.getCell(k,j);
-              }
-          }
-      }
-      return result;
-  }
-
+        for (int i = 0; i < r1; i++)
+            for (int j = 0; j < c2; j++)
+                for (int k = 0; k < c1; k++)
+                    result.dMatrix[i][j] += dMatrix[i][k] * o.getCell(k,j);
+        return result;
+    }
   /**
    * многопоточное умножение матриц
    *
@@ -117,7 +100,7 @@ public class DenseMatrix implements Matrix
    * @param o
    * @return
    */
-   /*Сравнивает две матрицы на совпадение*/
+
   @Override
   public boolean equals(Object o) {
       if(!(o instanceof Matrix))
@@ -134,5 +117,4 @@ public class DenseMatrix implements Matrix
                   return false;
       return true;
   }
-
 }

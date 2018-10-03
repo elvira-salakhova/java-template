@@ -26,8 +26,5 @@ public interface Matrix
   double getCell(int row, int column);
   int numberOfColumns();
   int numberOfRows();
-  void resizeMatrix(int x, int y);
   boolean equals(Object o);
-
-
 }

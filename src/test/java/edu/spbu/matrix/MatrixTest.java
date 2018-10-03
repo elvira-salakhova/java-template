@@ -15,6 +15,14 @@ public class MatrixTest
    * ожидается 4 таких теста
    */
   @Test
+  public void numOfRowsAndColsTest () throws IOException {
+    DenseMatrix m = new DenseMatrix(2,4);
+    assertEquals(m.rows, 2);
+    assertEquals(m.columns, 4);
+  }
+
+
+  @Test
   public void readDM() throws IOException {
     /**
     В файл записывается матрица First размера n на n.
@@ -24,10 +32,9 @@ public class MatrixTest
     BufferedWriter checkArr = new BufferedWriter (new FileWriter("src/checkArray.txt"));
     int n = 6;
 
-    DenseMatrix First = new DenseMatrix("");
-    First.resizeMatrix(n,n);
-
-    for (int i = 0; i<n; i++){
+    DenseMatrix First = new DenseMatrix(n,n);
+    for (int i = 0; i<n; i++)
+    {
       for (int j = 0; j<n; j++)
       {
         First.dMatrix[i][j] = (i+2)*(j+1);
@@ -35,43 +42,45 @@ public class MatrixTest
       }
       checkArr.newLine();
     }
-    checkArr.flush();
     checkArr.close();
-
-    /*прочтение*/
-      DenseMatrix Second = new DenseMatrix("src/checkArray.txt");
-    /*проверка*/
-
-      assertEquals(First, Second);
-
-
-
+    DenseMatrix Second = new DenseMatrix("src/checkArray.txt");
+    assertEquals(First, Second);
   }
 
 
   @Test
-    public void mulDD() throws IOException {
-        Matrix m1 = new DenseMatrix("src/m1.txt");
-        Matrix m2 = new DenseMatrix("src/m2.txt");
-        Matrix expected = new DenseMatrix("src/result.txt");
-        assertEquals(expected, m1.mul(m2));
-    }
-
-
-
-  /*
-
-    @Test
-  public void getCellTest() throws FileNotFoundException {
+  public void mulDD() throws IOException
+  {
       Matrix m1 = new DenseMatrix("src/m1.txt");
-      Assert.assertEquals(m1.getCell(2,2), 1.0, 0);
-    }
-    @Test
-  public void mulDD() throws FileNotFoundException {
-    Matrix m1 = new DenseMatrix("src/m1.txt");
+      Matrix m2 = new DenseMatrix("src/m2.txt");
+      Matrix expected = new DenseMatrix("src/result.txt");
+      assertEquals(expected, m1.mul(m2));
+  }
+
+ @Test
+ public void mulSS()  throws IOException
+ {
+   Matrix m1 = new SparseMatrix("src/m1.txt");
+   Matrix m2 = new SparseMatrix("src/m2.txt");
+   Matrix expected = new SparseMatrix("src/result.txt");
+   assertEquals(expected, m1.mul(m2));
+ }
+
+  @Test
+  public void mulSD()  throws IOException
+  {
+    Matrix m1 = new SparseMatrix("src/m1.txt");
     Matrix m2 = new DenseMatrix("src/m2.txt");
     Matrix expected = new DenseMatrix("src/result.txt");
     assertEquals(expected, m1.mul(m2));
   }
-  */
+
+  @Test
+  public void mulDS()  throws IOException
+  {
+    Matrix m1 = new DenseMatrix("src/m1.txt");
+    Matrix m2 = new SparseMatrix("src/m2.txt");
+    Matrix expected = new DenseMatrix("src/result.txt");
+    assertEquals(expected, m1.mul(m2));
+  }
 }
