@@ -1,9 +1,6 @@
 package edu.spbu.matrix;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Scanner;
 import java.util.*;
 
@@ -15,8 +12,8 @@ public class SparseMatrix implements Matrix
   public int rows = 0;
   public int columns = 0;
   public double[][] sMatrix;  /* массив матрицы */
-  public static final int ARRAY_SIZE = 3000; /* максимальный размер массива */
-  public Map<Integer, Map<Integer, Double>> table = new HashMap<>();
+  public static final int ARRAY_SIZE = 1000; /* максимальный размер массива */
+  public Map<Integer, Map<Integer, Double>> hashTable = new HashMap<>();
 
   @Override
   public int numberOfColumns() {
@@ -30,9 +27,25 @@ public class SparseMatrix implements Matrix
 
   @Override
   public double getCell(int row, int column) {
-
     return sMatrix[row][column];
+  }
 
+  /**
+   * Строится hash-таблица
+   */
+
+  public Map<Integer, Map<Integer, Double>> getHashMap()
+  {
+    int i, j;
+    for( i = 0; i < rows; ++i)
+      for(j=0; j < columns; ++j)
+        if(sMatrix[i][j] != 0)
+        {
+          if(!hashTable.containsKey(i))
+            hashTable.put(i, new HashMap<>());
+          hashTable.get(i).put(j, sMatrix[i][j]);
+        }
+    return hashTable;
   }
 
   /**
@@ -65,35 +78,15 @@ public class SparseMatrix implements Matrix
           }
       }
       input.close();
-    getHashMap();
+      getHashMap();
   }
 
     public SparseMatrix(int x, int y){
         rows = x;
         columns = y;
         sMatrix = new double[rows][columns];
-      getHashMap();
+        getHashMap();
     }
-
-  /**
-   * построить ХЭШ-таблицу
-   */
-
-  public Map<Integer, Map<Integer, Double>> getHashMap()
-  {
-    int i, j;
-    for(i=0;i<rows;++i)
-      for(j=0;j<columns;++j)
-        if(sMatrix[i][j]!=0)
-        {
-          if(!table.containsKey(i))
-            table.put(i, new HashMap<>());
-          table.get(i).put(j, sMatrix[i][j]);
-        }
-    return table;
-  }
-
-
 
   /**
    * однопоточное умнджение матриц
@@ -105,33 +98,29 @@ public class SparseMatrix implements Matrix
   @Override public Matrix mul(Matrix o) throws FileNotFoundException {
     if(o instanceof SparseMatrix)
     {
-      SparseMatrix R = new SparseMatrix(rows,o.numberOfColumns());
-      Map<Integer, Map<Integer, Double>> T = ((SparseMatrix) o).getHashMap();
-      for (int i : table.keySet()) {
-        for (int j : table.get(i).keySet()) {
-          if (!T.containsKey(j)) {
+      SparseMatrix currentMatrix = new SparseMatrix(rows,o.numberOfColumns());
+      Map<Integer, Map<Integer, Double>> currentHashTable = ((SparseMatrix) o).getHashMap();
+      for (int i : hashTable.keySet()) {
+        for (int j : hashTable.get(i).keySet()) {
+          if (!currentHashTable.containsKey(j)) {
             continue;
           }
-          for (int k : T.get(j).keySet()) {
-            R.sMatrix[i][k] += table.get(i).get(j) * T.get(j).get(k);
+          for (int k : currentHashTable.get(j).keySet()) {
+            currentMatrix.sMatrix[i][k] += hashTable.get(i).get(j) * currentHashTable.get(j).get(k);
           }
         }
       }
-      return R;
+      return currentMatrix;
     }
     else
     {
-      DenseMatrix R = new DenseMatrix(rows,o.numberOfColumns());
-
-
+      DenseMatrix currentMatrix = new DenseMatrix(rows,o.numberOfColumns());
         for (int i = 0; i < rows; i++)
           for (int j = 0; j < o.numberOfColumns(); j++)
             for (int k = 0; k < o.numberOfRows(); k++)
-              R.dMatrix[i][j] += sMatrix[i][k] * o.getCell(k,j);
-
-      return R;
+              currentMatrix.dMatrix[i][j] += sMatrix[i][k] * o.getCell(k,j);
+      return currentMatrix;
     }
-
   }
 
   /**
@@ -158,7 +147,6 @@ public class SparseMatrix implements Matrix
    */
 
 
-
   @Override public boolean equals(Object o) {
     if(!(o instanceof Matrix))
       return false;
@@ -174,7 +162,7 @@ public class SparseMatrix implements Matrix
     return true;
   }
 
- public void printmatrix(String fileName) throws IOException {
+/* public void printmatrix(String fileName) throws IOException {
     FileWriter writer = new FileWriter(fileName);
     if(rows==0 && columns==0)
     {
@@ -194,6 +182,6 @@ public class SparseMatrix implements Matrix
     }
     writer.close();
   }
-
+*/
 
 }

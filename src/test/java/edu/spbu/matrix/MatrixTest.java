@@ -1,12 +1,7 @@
 package edu.spbu.matrix;
 
-import org.junit.Assert;
 import org.junit.Test;
 import java.io.*;
-import java.io.FileNotFoundException;
-import java.util.Arrays;
-
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class MatrixTest
@@ -14,13 +9,13 @@ public class MatrixTest
   /**
    * ожидается 4 таких теста
    */
+
   @Test
   public void numOfRowsAndColsTest () throws IOException {
     DenseMatrix m = new DenseMatrix(2,4);
     assertEquals(m.rows, 2);
     assertEquals(m.columns, 4);
   }
-
 
   @Test
   public void readDM() throws IOException {
@@ -57,14 +52,15 @@ public class MatrixTest
       assertEquals(expected, m1.mul(m2));
   }
 
- @Test
- public void mulSS()  throws IOException
- {
-   Matrix m1 = new SparseMatrix("src/m1.txt");
-   Matrix m2 = new SparseMatrix("src/m2.txt");
-   Matrix expected = new SparseMatrix("src/result.txt");
-   assertEquals(expected, m1.mul(m2));
- }
+
+  @Test
+  public void mulSS()  throws IOException
+  {
+    Matrix m1 = new SparseMatrix("src/m1.txt");
+    Matrix m2 = new SparseMatrix("src/m2.txt");
+    Matrix expected = new SparseMatrix("src/result.txt");
+    assertEquals(expected, m1.mul(m2));
+  }
 
   @Test
   public void mulSD()  throws IOException
