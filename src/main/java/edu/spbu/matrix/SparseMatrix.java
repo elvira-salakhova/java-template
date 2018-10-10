@@ -1,6 +1,9 @@
 package edu.spbu.matrix;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.*;
 
@@ -11,9 +14,12 @@ public class SparseMatrix implements Matrix
 {
   public int rows = 0;
   public int columns = 0;
-  public double[][] sMatrix;  /* массив матрицы */
-  public static final int ARRAY_SIZE = 1000; /* максимальный размер массива */
-  public Map<Integer, Map<Integer, Double>> hashTable = new HashMap<>();
+  HashMap<Integer,Double> value = new HashMap<>(); /* массив ненулевых значений */
+  HashMap<Integer,Integer> column = new HashMap<>();
+  HashMap<Integer,Integer> row = new HashMap<>();
+
+  //public static final int ARRAY_SIZE = 3000; /* максимальный размер массива */
+
 
   @Override
   public int numberOfColumns() {
@@ -27,25 +33,9 @@ public class SparseMatrix implements Matrix
 
   @Override
   public double getCell(int row, int column) {
-    return sMatrix[row][column];
-  }
 
-  /**
-   * Строится hash-таблица
-   */
+    return 0;
 
-  public Map<Integer, Map<Integer, Double>> getHashMap()
-  {
-    int i, j;
-    for( i = 0; i < rows; ++i)
-      for(j=0; j < columns; ++j)
-        if(sMatrix[i][j] != 0)
-        {
-          if(!hashTable.containsKey(i))
-            hashTable.put(i, new HashMap<>());
-          hashTable.get(i).put(j, sMatrix[i][j]);
-        }
-    return hashTable;
   }
 
   /**
@@ -56,37 +46,71 @@ public class SparseMatrix implements Matrix
       if(fileName.trim().length()==0) // если файл не существует
           return;
 
-      int j;
       String[] currentRowArray;
       Scanner input = new Scanner(new File(fileName));
       String currentRow="1";
+      double temp;
+      int j = 0;
+      int k = 0;
+
 
       while(input.hasNextLine() && currentRow.trim().length()!=0) /* пока есть непустые строки */
       {
           ++rows;
           currentRow = input.nextLine();
           currentRowArray = currentRow.split(" ");
-          if(rows == 1)
-          {
-              columns = currentRowArray.length;
-              sMatrix = new double[ARRAY_SIZE][columns];
+          /*Обработка текущей строки*/
+          for (int i = 0; i < currentRowArray.length; ++i){
+            temp = Double.parseDouble(currentRowArray[i]);
+            if (temp != 0.0) {
+              row.put(j,rows-1);
+              value.put(j, temp);
+              column.put(j,i);
+              j++;
+            }
           }
 
-          for(j=0; j<columns; ++j)
+        if(rows == 1)
           {
-              sMatrix[rows-1][j]=Double.parseDouble(currentRowArray[j]);
+              columns = currentRowArray.length;
           }
       }
       input.close();
-      getHashMap();
   }
 
-    public SparseMatrix(int x, int y){
-        rows = x;
-        columns = y;
-        sMatrix = new double[rows][columns];
-        getHashMap();
+  public SparseMatrix(int x, int y){
+    rows = x;
+    columns = y;
+  }
+  public SparseMatrix SparseMatrixTranspose() {
+    SparseMatrix result = new SparseMatrix(columns, rows);
+    int count[] = new int[columns];
+    for (int i = 0; i < value.size(); i++)
+      count[column.get(i)]++;
+    int[] index = new int[columns];
+
+    index[0] = 0;
+
+    for (int i = 1; i< columns; i++)
+      index[i] = index[i-1] + count[i-1];
+    for (int i = 0; i < value.size(); i++){
+      int rpos = index[column.get(i)]++;
+
+      result.row.put(rpos, column.get(i));
+      result.column.put(rpos, row.get(i));
+      result.value.put(rpos, value.get(i));
     }
+    return result;
+  }
+
+  public void transposeSparseMatrix(){
+    HashMap<Integer,Integer> temp = new HashMap<>();
+      int t;
+      t = rows; rows = columns; columns = t;
+      temp.putAll(row);
+      row.putAll(column);
+      column.putAll(temp);
+  }
 
   /**
    * однопоточное умнджение матриц
@@ -95,32 +119,50 @@ public class SparseMatrix implements Matrix
    * @param o
    * @return
    */
-  @Override public Matrix mul(Matrix o) throws FileNotFoundException {
-    if(o instanceof SparseMatrix)
+  @Override public SparseMatrix mul(Matrix o) throws FileNotFoundException {
+    if (o instanceof SparseMatrix)
     {
-      SparseMatrix currentMatrix = new SparseMatrix(rows,o.numberOfColumns());
-      Map<Integer, Map<Integer, Double>> currentHashTable = ((SparseMatrix) o).getHashMap();
-      for (int i : hashTable.keySet()) {
-        for (int j : hashTable.get(i).keySet()) {
-          if (!currentHashTable.containsKey(j)) {
-            continue;
-          }
-          for (int k : currentHashTable.get(j).keySet()) {
-            currentMatrix.sMatrix[i][k] += hashTable.get(i).get(j) * currentHashTable.get(j).get(k);
-          }
-        }
+      if (columns != ((SparseMatrix) o).rows) {
+        System.out.println("Cannot multiply");
+        return null;
       }
-      return currentMatrix;
+      o = ((SparseMatrix) o).SparseMatrixTranspose();
+      SparseMatrix result = new SparseMatrix(rows, ((SparseMatrix) o).rows);
+      for (int i = 0; i< value.size();){
+        int currentRowResult = row.get(i);
+        for (int j = 0; j<((SparseMatrix) o).value.size();) {
+          int currentColumnResult = ((SparseMatrix) o).row.get(j);
+
+          int ti = i;
+          int tj = j;
+
+          double sum = 0;
+
+          while (ti < value.size() && row.get(ti) == currentRowResult
+          && tj < ((SparseMatrix) o).value.size() && ((SparseMatrix) o).row.get(tj) == currentColumnResult) {
+            if (column.get(ti)<((SparseMatrix) o).column.get(tj))
+              ti++;
+            else if (column.get(ti) > ((SparseMatrix) o).column.get(tj))
+              tj++;
+            else
+              sum += value.get(ti++)*((SparseMatrix) o).value.get(tj++);
+          }
+          if (sum != 0) {
+            int key = result.value.size();
+            result.row.put(key, currentRowResult);
+            result.column.put(key, currentColumnResult);
+            result.value.put(key, sum);
+          }
+
+          while (j < ((SparseMatrix) o).value.size() && ((SparseMatrix) o).row.get(j) == currentColumnResult)
+            j++;
+        }
+        while (i < value.size() && row.get(i) == currentRowResult)
+          i++;
+      }
+      return result;
     }
-    else
-    {
-      DenseMatrix currentMatrix = new DenseMatrix(rows,o.numberOfColumns());
-        for (int i = 0; i < rows; i++)
-          for (int j = 0; j < o.numberOfColumns(); j++)
-            for (int k = 0; k < o.numberOfRows(); k++)
-              currentMatrix.dMatrix[i][j] += sMatrix[i][k] * o.getCell(k,j);
-      return currentMatrix;
-    }
+    return null;
   }
 
   /**
@@ -147,41 +189,25 @@ public class SparseMatrix implements Matrix
    */
 
 
+
   @Override public boolean equals(Object o) {
-    if(!(o instanceof Matrix))
-      return false;
-    Matrix Q = ((Matrix)o);
-    if(rows != Q.numberOfRows() || columns != Q.numberOfColumns())
-    {
-      return false;
-    }
-    for(int i=0;i<rows;++i)
-      for(int j=0;j<columns;++j)
-        if(sMatrix[i][j]!=Q.getCell(i,j))
-          return false;
-    return true;
+
+    return false;
   }
 
-/* public void printmatrix(String fileName) throws IOException {
-    FileWriter writer = new FileWriter(fileName);
-    if(rows==0 && columns==0)
-    {
-      writer.write("Empty matrix");
-      return;
+  public void printSparseMatrix() {
+    double[][] array = new double[rows][columns];
+    for (int i = 0; i < value.size(); ++i) {
+      array[row.get(i)][column.get(i)] = value.get(i);
     }
-    int i, j;
-    String x;
-    for(i=0;i<rows;++i)
-    {
-      for(j=0;j<columns;++j)
-      {
-        x = Double.toString(sMatrix[i][j]);
-        writer.write(x+" ");
-      }
-      writer.write(System.getProperty( "line.separator" ));
+
+    for (int i = 0; i < rows; ++i) {
+      for (int j = 0; j < columns; ++j)
+        System.out.print(array[i][j] + " ");
+      System.out.println(" ");
     }
-    writer.close();
   }
-*/
+
+
 
 }
