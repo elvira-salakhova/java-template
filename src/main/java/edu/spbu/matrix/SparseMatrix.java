@@ -191,8 +191,15 @@ public class SparseMatrix implements Matrix
 
 
   @Override public boolean equals(Object o) {
+    if(!(o instanceof Matrix))
+      return false;
 
-    return false;
+    SparseMatrix Q = ((SparseMatrix)o);
+    if(Q.numberOfRows() != rows || Q.numberOfColumns() != columns)
+      return false;
+    if (value != Q.value || row != Q.row || column != Q.column)
+      return false;
+    return true;
   }
 
   public void printSparseMatrix() {

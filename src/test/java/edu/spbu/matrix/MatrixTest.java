@@ -19,6 +19,7 @@ public class MatrixTest
   public void SparseMulTest() throws FileNotFoundException {
     SparseMatrix m1 = new SparseMatrix("src/test/resources/m1.txt");
     SparseMatrix m2 = new SparseMatrix("src/test/resources/m2.txt");
+    //SparseMatrix expected = new SparseMatrix("src/test/resources/result.txt");
     SparseMatrix res = new SparseMatrix(m1.rows, m2.columns);
     res = m1.mul(m2);
     res.printSparseMatrix();
@@ -27,6 +28,7 @@ public class MatrixTest
     System.out.println(res.value);
     System.out.println(res.row);
     System.out.println(res.column);
+    //assertEquals(expected, res);
   }
 
   @Test
