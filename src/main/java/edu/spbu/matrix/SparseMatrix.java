@@ -18,8 +18,6 @@ public class SparseMatrix implements Matrix
   HashMap<Integer,Integer> column = new HashMap<>();
   HashMap<Integer,Integer> row = new HashMap<>();
 
-  //public static final int ARRAY_SIZE = 3000; /* максимальный размер массива */
-
 
   @Override
   public int numberOfColumns() {
@@ -37,7 +35,6 @@ public class SparseMatrix implements Matrix
     return 0;
 
   }
-
   /**
    * загружает матрицу из файла
    * @param fileName
@@ -82,6 +79,7 @@ public class SparseMatrix implements Matrix
     rows = x;
     columns = y;
   }
+
   public SparseMatrix SparseMatrixTranspose() {
     SparseMatrix result = new SparseMatrix(columns, rows);
     int count[] = new int[columns];
@@ -103,13 +101,20 @@ public class SparseMatrix implements Matrix
     return result;
   }
 
-  public void transposeSparseMatrix(){
-    HashMap<Integer,Integer> temp = new HashMap<>();
-      int t;
-      t = rows; rows = columns; columns = t;
-      temp.putAll(row);
-      row.putAll(column);
-      column.putAll(temp);
+  public SparseMatrix toSparse(DenseMatrix matrix){
+    SparseMatrix result = new SparseMatrix(matrix.rows, matrix.columns);
+    int key = 0;
+    for (int i = 0; i<matrix.rows; i++)
+      for (int j=0; j<matrix.columns; j++)
+        if (matrix.dMatrix[i][j] != 0)
+        {
+          result.value.put(key, matrix.dMatrix[i][j]);
+          result.row.put(key, i);
+          result.column.put(key, j);
+          key++;
+        }
+    key++;
+    return result;
   }
 
   /**
@@ -189,7 +194,6 @@ public class SparseMatrix implements Matrix
    */
 
 
-
   @Override public boolean equals(Object o) {
     if(!(o instanceof Matrix))
       return false;
@@ -197,8 +201,10 @@ public class SparseMatrix implements Matrix
     SparseMatrix Q = ((SparseMatrix)o);
     if(Q.numberOfRows() != rows || Q.numberOfColumns() != columns)
       return false;
-    if (value != Q.value || row != Q.row || column != Q.column)
-      return false;
+    for (int i = 0; i<value.size(); i++)
+      if (value.get(i)-Q.value.get(i) != 0 || row.get(i)-Q.row.get(i) != 0
+      || column.get(i)-Q.column.get(i) != 0)
+        return false;
     return true;
   }
 
@@ -214,7 +220,4 @@ public class SparseMatrix implements Matrix
       System.out.println(" ");
     }
   }
-
-
-
 }

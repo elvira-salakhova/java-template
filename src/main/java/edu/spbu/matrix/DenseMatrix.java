@@ -117,4 +117,12 @@ public class DenseMatrix implements Matrix
                   return false;
       return true;
   }
+
+  public void printDenseMatrix(){
+      for (int i = 0; i<rows; i++){
+          for (int j=0; j<columns; j++)
+              System.out.print(dMatrix[i][j]+ " ");
+          System.out.println(" ");
+      }
+  }
 }
