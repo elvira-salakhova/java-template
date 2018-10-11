@@ -125,6 +125,8 @@ public class SparseMatrix implements Matrix
    * @return
    */
   @Override public SparseMatrix mul(Matrix o) throws FileNotFoundException {
+    if (o instanceof DenseMatrix)
+      o = ((DenseMatrix)o).toSparse();
     if (o instanceof SparseMatrix)
     {
       if (columns != ((SparseMatrix) o).rows) {

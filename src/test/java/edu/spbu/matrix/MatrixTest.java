@@ -1,12 +1,12 @@
 package edu.spbu.matrix;
 
-import org.junit.Assert;
 import org.junit.Test;
-import java.io.*;
-import java.io.FileNotFoundException;
-import java.util.Arrays;
 
-import static org.junit.Assert.assertArrayEquals;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 
 public class MatrixTest
@@ -51,6 +51,7 @@ public class MatrixTest
 
   @Test
   public void SparseMulTest() throws FileNotFoundException {
+    System.out.println("SPARSE MULTIPLICATION");
     SparseMatrix m1 = new SparseMatrix("src/test/resources/m1.txt");
     SparseMatrix m2 = new SparseMatrix("src/test/resources/m2.txt");
     SparseMatrix expected = new SparseMatrix("src/test/resources/result.txt");
@@ -69,12 +70,13 @@ public class MatrixTest
     System.out.println("value  >> " +expected.value);
     System.out.println("row    >> " +expected.row);
     System.out.println("column >> " +expected.column);
-
+    System.out.println("-----------------------------");
     assertEquals(expected, res);
   }
 
   @Test
   public void TransposeSparseMatrixTest () throws FileNotFoundException {
+    System.out.println("SPARSE TRANSPOSE");
     SparseMatrix m1 = new SparseMatrix("src/test/resources/m2.txt");
     System.out.println("Given matrix:");
     m1.printSparseMatrix();
@@ -90,6 +92,7 @@ public class MatrixTest
     System.out.println("value  >> " +res.value);
     System.out.println("row    >> " +res.row);
     System.out.println("column >> " +res.column);
+    System.out.println("-------------------------------");
   }
 
  @Test
@@ -103,6 +106,7 @@ public class MatrixTest
 
   @Test
   public void toSparseTest() throws IOException {
+    System.out.println("DENSE TO SPARSE");
     DenseMatrix m1 = new DenseMatrix("src/test/resources/m1.txt");
     m1.printDenseMatrix();
     SparseMatrix m2 = new SparseMatrix(((DenseMatrix) m1).rows,((DenseMatrix) m1).columns);
@@ -111,6 +115,7 @@ public class MatrixTest
     System.out.println("value  >> " +m2.value);
     System.out.println("row    >> " +m2.row);
     System.out.println("column >> " +m2.column);
+    System.out.println("------------------------------");
   }
 
   @Test
@@ -118,10 +123,11 @@ public class MatrixTest
   {
     DenseMatrix m1 = new DenseMatrix("src/test/resources/m1.txt");
     SparseMatrix m2 = new SparseMatrix("src/test/resources/m2.txt");
-    SparseMatrix m3 = new SparseMatrix(((DenseMatrix) m1).rows,((DenseMatrix) m1).columns);
-    m3 = m3.toSparse(m1);
+    //SparseMatrix m3 = new SparseMatrix(((DenseMatrix) m1).rows,((DenseMatrix) m1).columns);
+    //m3 = m3.toSparse(m1);
     SparseMatrix expected = new SparseMatrix("src/test/resources/result.txt");
-    assertEquals(expected, m3.mul(m2));
+    //m1.mul(m2).printSparseMatrix();
+    assertEquals(expected, m1.mul(m2));
   }
 
   @Test

@@ -25,6 +25,21 @@ public class DenseMatrix implements Matrix
         return dMatrix[row][column];
     }
 
+    public SparseMatrix toSparse(){
+        SparseMatrix result = new SparseMatrix(rows, columns);
+        int key = 0;
+        for (int i = 0; i<rows; i++)
+            for (int j=0; j<columns; j++)
+                if (dMatrix[i][j] != 0)
+                {
+                    result.value.put(key, dMatrix[i][j]);
+                    result.row.put(key, i);
+                    result.column.put(key, j);
+                    key++;
+                }
+        key++;
+        return result;
+    }
     /**
      * загружает матрицу из файла
      * @param fileName
@@ -71,19 +86,28 @@ public class DenseMatrix implements Matrix
    * @return
    */
     @Override public Matrix mul(Matrix o) throws IOException {
-        int r1 = rows;
-        int c1 = columns;
-        int r2 = o.numberOfRows();
-        int c2 = o.numberOfColumns();
+        if (o instanceof DenseMatrix) {
 
-        DenseMatrix result = new DenseMatrix(rows,o.numberOfColumns());
+            int r1 = rows;
+            int c1 = columns;
+            int r2 = o.numberOfRows();
+            int c2 = o.numberOfColumns();
 
-        for (int i = 0; i < r1; i++)
-            for (int j = 0; j < c2; j++)
-                for (int k = 0; k < c1; k++)
-                    result.dMatrix[i][j] += dMatrix[i][k] * o.getCell(k,j);
-        return result;
+            DenseMatrix result = new DenseMatrix(rows, o.numberOfColumns());
+
+            for (int i = 0; i < r1; i++)
+                for (int j = 0; j < c2; j++)
+                    for (int k = 0; k < c1; k++)
+                        result.dMatrix[i][j] += dMatrix[i][k] * o.getCell(k, j);
+            return result;
+        }
+        if (o instanceof SparseMatrix)
+        {
+            return this.toSparse().mul(o);
+        }
+        return null;
     }
+
   /**
    * многопоточное умножение матриц
    *
