@@ -46,7 +46,25 @@ public class MatrixTest
       Matrix m1 = new DenseMatrix("src/test/resources/m1.txt");
       Matrix m2 = new DenseMatrix("src/test/resources/m2.txt");
       Matrix expected = new DenseMatrix("src/test/resources/result.txt");
-      assertEquals(expected, m1.mul(m2));
+      assertEquals(expected, m1.dmul(m2));
+
+  }
+
+  @Test
+  public void dmulDD() throws IOException {
+    Matrix m1 = new DenseMatrix("src/test/resources/dm1.txt");
+    Matrix m2 = new DenseMatrix("src/test/resources/dm2.txt");
+    long t1 = System.currentTimeMillis();
+    Matrix R = m1.dmul(m2);
+    long t2 = System.currentTimeMillis();
+    long t3 = System.currentTimeMillis();
+    Matrix R2 = m1.mul(m2);
+    long t4 = System.currentTimeMillis();
+    assertEquals(R,R2);
+    System.out.println("Время парралельного перемножения матриц размерами 2000 X 2000: "
+            +(t2-t1));
+    System.out.println("Время обычного перемножения матриц размерами 2000 X 2000: "
+            +(t4-t3));
   }
 
   @Test
