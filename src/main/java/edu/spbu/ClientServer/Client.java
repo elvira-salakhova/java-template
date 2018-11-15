@@ -1,38 +1,51 @@
 package edu.spbu.ClientServer;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
+
 
 public class Client {
 
-    private static Socket clientSocket; //сокет для общения
-    private static BufferedReader reader;
-    private static BufferedReader in;
-    private static BufferedWriter out;
+    public static void main(String args[]) {
+        String host = "127.0.0.1";
+        int port = 8080;
+        new Client(host, port);
+    }
 
-    public static void main(String[] args) {
+    public Client(String host, int port) {
         try {
-            try {
-                clientSocket = new Socket("localhost", 8080);
-                reader = new BufferedReader(new InputStreamReader(System.in));
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            String serverHostname = new String("127.0.0.1");
 
-                System.out.println("Клиент:");
-                String word = reader.readLine();
-                out.write(word + "\n");
-                out.flush();
-                String serverWord = in.readLine();
-                System.out.println(serverWord);
-            } finally {
-                System.out.println("Клиент был закрыт...");
-                clientSocket.close();
-                in.close();
-                out.close();
+            System.out.println("Соединение " + serverHostname + " по порту " + port + ".");
+
+            Socket echoSocket;
+            PrintWriter out;
+            BufferedReader in;
+
+            echoSocket = new Socket(serverHostname, 8080);
+            out = new PrintWriter(echoSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
+
+            BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+
+            while (true) {
+                System.out.print("Клиент: ");
+                String userInput = stdIn.readLine();
+                if ("q".equals(userInput)) {
+                    break;
+                }
+                out.println(userInput);
+                System.out.println("Сервер: Вы сказали '" + in.readLine()+ "'?");
             }
-        } catch (IOException e) {
-            System.err.println(e);
-        }
 
+            out.close();
+            in.close();
+            stdIn.close();
+            echoSocket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

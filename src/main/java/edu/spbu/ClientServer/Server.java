@@ -1,43 +1,68 @@
 package edu.spbu.ClientServer;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server {
+public class Server extends Thread {
+    public static final int PORT_NUMBER = 8080;
 
-    private static Socket clientSocket; //сокет для общения
-    private static ServerSocket server; // серверсокет
-    private static BufferedReader in; // поток чтения из сокета
-    private static BufferedWriter out; // поток записи в сокет
+    protected Socket socket;
+
+    private Server(Socket socket) {
+        this.socket = socket;
+        System.out.println("Новый клиент:" + socket.getInetAddress().getHostAddress());
+        start();
+    }
+
+    public void run() {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = socket.getInputStream();
+            out = socket.getOutputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String request;
+            while ((request = br.readLine()) != null) {
+                System.out.println("Полученное сообщение:" + request);
+                request += '\n';
+                out.write(request.getBytes());
+            }
+
+        } catch (IOException ex) {
+            //System.out.println("Unable to get streams from client");
+        } finally {
+            try {
+                in.close();
+                out.close();
+                socket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 
     public static void main(String[] args) {
+        System.out.println("Сервер запущен");
+        ServerSocket server = null;
         try {
-            try {
-                server = new ServerSocket(8080);
-                System.out.println("Сервер запущен!");
-                clientSocket = server.accept();
-                try {
-                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-
-                    String word = in.readLine();
-                    System.out.println(word);
-                    out.write("Вы написали : " + word + "\n");
-                    out.flush(); // очистить буфер
-
-                } finally {
-                    System.out.println("Сокет закрыт");
-                    clientSocket.close();
-                    in.close();
-                    out.close();
-                }
-            } finally {
-                System.out.println("Сервер закрыт!");
-                server.close();
+            server = new ServerSocket(PORT_NUMBER);
+            while (true) {
+                new Server(server.accept());
             }
-        } catch (IOException e) {
-            System.err.println(e);
+        } catch (IOException ex) {
+            System.out.println("Сервер не запустился");
+        } finally {
+            try {
+                if (server != null)
+                    server.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
