@@ -187,55 +187,7 @@ public class SparseMatrix implements Matrix
 
   @Override public Matrix dmul(Matrix o)
   {
-
-    SparseMatrix Result = new SparseMatrix(rows, o.numberOfColumns());
-
-    class Task implements Runnable {
-      int firstRow;
-      int lastRow;
-      public Task(int x, int y)
-      {
-        firstRow = x;
-        lastRow = y;
-      }
-      public void run()
-      {
-        int i, j, k;
-        for(i=firstRow;i<=lastRow;++i)
-          for(j=0;j<o.numberOfColumns(); j++)
-            for (k = 0; k < o.numberOfRows(); ++k)
-              Result.dMatrix[i][j] += getCell(i,k) * o.getCell(k,j);
-      }
-    }
-
-    int threadsCount = 4;
-    int m = rows;
-    if (threadsCount > m) {
-      threadsCount = m;
-    }
-    /*посчитаем сколько строк результирующей матрицы будет считать каждый поток*/
-    int count = m / threadsCount;
-    int additional = m % threadsCount; //если не делится на threadsCount, то добавим к первому потоку
-    //создаем и запускаем потоки
-    Thread[] threads = new Thread[threadsCount];
-    int start = 0; int cnt;
-    for (int i = 0; i < threadsCount; i++) {
-      //int cnt = ((i == 0) ? count + additional : count);
-      if (i == 0) cnt = count + additional;
-      else cnt = count;
-      threads[i] = new Thread(new Task(start, start + cnt - 1));
-      start += cnt;
-      threads[i].start();
-    }
-    //ждем завершения
-    try {
-      for (Thread thread : threads) {
-        thread.join();
-      }
-    } catch (InterruptedException e) {
-      System.out.println("Interrupted");
-    }
-    return Result;
+    return null;
   }
 
   /**
