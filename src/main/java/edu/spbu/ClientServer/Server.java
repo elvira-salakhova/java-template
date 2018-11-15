@@ -1,12 +1,9 @@
 package edu.spbu.ClientServer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Server extends Thread {
     public static final int PORT_NUMBER = 8080;
@@ -26,16 +23,45 @@ public class Server extends Thread {
             in = socket.getInputStream();
             out = socket.getOutputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
             String request;
+            String[] line = new String[5];
             while ((request = br.readLine()) != null) {
-                System.out.println("Полученное сообщение:" + request);
+                if ("G".equals(request.charAt(0))){
+                    line = request.split(" ");
+                }
+                System.out.println(request);
                 request += '\n';
                 out.write(request.getBytes());
             }
+            Scanner input = new Scanner(new File(line[1]));
+            String s = "<html>\n" +
+                    "<html>\n" +
+                    "<body>\n" +
+                    "\n" +
+                    "<h1>This is heading 1</h1>\n" +
+                    "<h2>This is heading 2</h2>\n" +
+                    "<h3>This is heading 3</h3>\n" +
+                    "<h4>This is heading 4</h4>\n" +
+                    "<h5>This is heading 5</h5>\n" +
+                    "<h6>This is heading 6</h6>\n" +
+                    "\n" +
+                    "</body>\n" +
+                    "</html>";
 
-        } catch (IOException ex) {
-            //System.out.println("Unable to get streams from client");
-        } finally {
+            String response = "HTTP/1.1 200 OK\r\n" +
+                    "Server: localhost\r\n" +
+                    "Content-Type: text/html\r\n" +
+                    "Content-Length: " + s.length() + "\r\n" +
+                    "Connection: close\r\n\r\n";
+            String result = response + s;
+            out.write(result.getBytes());
+            out.flush();
+        }
+        catch (IOException ex) {
+
+        }
+        finally {
             try {
                 in.close();
                 out.close();

@@ -9,36 +9,37 @@ import java.net.Socket;
 public class Client {
 
     public static void main(String args[]) {
-        String host = "127.0.0.1";
-        int port = 8080;
+        String host = "www.ru";
+        int port = 80;
         new Client(host, port);
     }
 
     public Client(String host, int port) {
         try {
-            String serverHostname = new String("127.0.0.1");
 
-            System.out.println("Соединение " + serverHostname + " по порту " + port + ".");
+            System.out.println("Соединение " + host + ":" + port + ".");
 
             Socket echoSocket;
             PrintWriter out;
             BufferedReader in;
 
-            echoSocket = new Socket(serverHostname, 8080);
+            echoSocket = new Socket(host, port);
             out = new PrintWriter(echoSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
 
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 
-            while (true) {
-                System.out.print("Клиент: ");
-                String userInput = stdIn.readLine();
-                if ("q".equals(userInput)) {
-                    break;
-                }
+                //System.out.print("Клиент: ");
+                //String userInput = stdIn.readLine();
+                String userInput = "GET / HTTP/1.1\n" +"Host: "+host+":"+"\n\n";
                 out.println(userInput);
-                System.out.println("Сервер: Вы сказали '" + in.readLine()+ "'?");
-            }
+                String line;
+                do {
+                    line = in.readLine();
+                    System.out.println(line);
+                }
+                while (line != null);
+
 
             out.close();
             in.close();
