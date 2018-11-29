@@ -25,16 +25,13 @@ public class Server extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
             String request;
-            String[] line = new String[5];
+            //String[] line = new String[5];
             while ((request = br.readLine()) != null) {
-                if ("G".equals(request.charAt(0))){
-                    line = request.split(" ");
-                }
                 System.out.println(request);
                 request += '\n';
                 out.write(request.getBytes());
             }
-            Scanner input = new Scanner(new File(line[1]));
+            //Scanner input = new Scanner(new File(line[1]));
             String s = "<html>\n" +
                     "<html>\n" +
                     "<body>\n" +
